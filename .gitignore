@@ -1,0 +1,22 @@
+# ── Secrets & credentials ─────────────────────────────────
+.env
+gmail_credentials.json
+token.json
+
+# ── Local database ─────────────────────────────────────────
+*.db
+
+# ── Temporary pipeline artifacts ───────────────────────────
+.tmp/
+
+# ── Python cache ───────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# ── IDE / OS ───────────────────────────────────────────────
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

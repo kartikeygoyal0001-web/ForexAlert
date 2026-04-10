@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manage Subscription — Forex Factory Alert</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #07090f;
+      --surface:   #0d1120;
+      --surface2:  #111827;
+      --border:    #1c2438;
+      --border2:   #243050;
+      --accent:    #4a7cf4;
+      --green:     #2dc98a;
+      --red:       #ef4565;
+      --text:      #c8d4e8;
+      --text-dim:  #5c7095;
+      --font-mono: 'JetBrains Mono', monospace;
+      --font-sans: 'Space Grotesk', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 40px 24px 60px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(74, 124, 244, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(74, 124, 244, 0.025) 1px, transparent 1px);
+      background-size: 56px 56px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    #sym-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .ccy-sym {
+      position: absolute;
+      font-family: var(--font-mono);
+      pointer-events: none;
+      user-select: none;
+      animation: sym-drift linear infinite;
+      top: -80px;
+    }
+
+    @keyframes sym-drift {
+      0%   { transform: translateY(-80px) rotate(-5deg); opacity: 0; }
+      6%   { opacity: 1; }
+      90%  { opacity: 1; }
+      100% { transform: translateY(calc(100vh + 80px)) rotate(5deg); opacity: 0; }
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 5;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    /* ── Back link ── */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      text-decoration: none;
+      margin-bottom: 28px;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--accent); }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px 36px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+      margin-bottom: 16px;
+    }
+
+    .card::before {
+      content: '';
+      display: block;
+      height: 1px;
+      margin: -40px -36px 32px;
+      border-radius: 16px 16px 0 0;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0.4;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #e8edf8;
+      margin-bottom: 6px;
+    }
+
+    .card-sub {
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+
+    /* ── Lookup form ── */
+    .field { margin-bottom: 20px; }
+
+    label {
+      display: block;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+
+    input[type="email"],
+    input[type="text"],
+    select {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 11px 14px;
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="email"]:focus,
+    input[type="text"]:focus,
+    select:focus {
+      border-color: var(--accent);
+    }
+
+    select option { background: var(--surface2); }
+
+    /* ── Errors ── */
+    .errors {
+      background: rgba(239, 69, 101, 0.07);
+      border: 1px solid rgba(239, 69, 101, 0.25);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 24px;
+      font-size: 13px;
+      color: #f08898;
+      line-height: 1.6;
+    }
+
+    .errors li { margin-left: 16px; }
+
+    /* ── Success message ── */
+    .msg-ok {
+      background: rgba(45, 201, 138, 0.07);
+      border: 1px solid rgba(45, 201, 138, 0.2);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 24px;
+      font-size: 13px;
+      color: var(--green);
+      line-height: 1.6;
+    }
+
+    /* ── Instrument chips ── */
+    .chip-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .chip input[type="checkbox"] { display: none; }
+
+    .chip label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border2);
+      background: var(--surface2);
+      font-size: 11px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      letter-spacing: 0.04em;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+      text-transform: none;
+      margin-bottom: 0;
+    }
+
+    .chip input:checked + label {
+      border-color: var(--green);
+      background: rgba(45, 201, 138, 0.1);
+      color: var(--green);
+    }
+
+    .chip-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--green);
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    .chip input:checked + label .chip-dot { opacity: 1; }
+
+    /* ── Group label ── */
+    .group-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-dim);
+      margin: 16px 0 8px;
+    }
+
+    .group-label:first-child { margin-top: 0; }
+
+    /* ── Buttons ── */
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      border: none;
+      transition: opacity 0.2s, transform 0.15s;
+      text-decoration: none;
+      text-align: center;
+    }
+
+    .btn:hover { transform: translateY(-1px); opacity: 0.9; }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--border2);
+      color: var(--text-dim);
+    }
+
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Cancel zone ── */
+    .cancel-zone {
+      background: var(--surface);
+      border: 1px solid rgba(239, 69, 101, 0.2);
+      border-radius: 16px;
+      padding: 28px 36px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+    }
+
+    .cancel-zone::before {
+      content: '';
+      display: block;
+      height: 1px;
+      margin: -28px -36px 24px;
+      border-radius: 16px 16px 0 0;
+      background: linear-gradient(90deg, transparent, var(--red), transparent);
+      opacity: 0.35;
+    }
+
+    .cancel-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #e8edf8;
+      margin-bottom: 6px;
+    }
+
+    .cancel-sub {
+      font-size: 12px;
+      color: var(--text-dim);
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    .btn-danger {
+      background: transparent;
+      border: 1px solid rgba(239, 69, 101, 0.4);
+      color: var(--red);
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .btn-danger:hover {
+      background: rgba(239, 69, 101, 0.08);
+      border-color: var(--red);
+    }
+
+    /* ── Status bar ── */
+    .status-bar {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-top: 20px;
+      letter-spacing: 0.08em;
+      text-align: center;
+    }
+
+    .status-bar .dot-green { color: var(--green); }
+    .status-bar .dot-red   { color: var(--red); }
+  </style>
+</head>
+<body>
+
+<div id="sym-bg"></div>
+
+<div class="wrap">
+  <a href="/" class="back-link">← Back to signup</a>
+
+  {% if flash_global %}
+  <div class="msg-ok" style="margin-bottom:20px;">{{ flash_global }}</div>
+  {% endif %}
+
+  {% if not user %}
+  {# ── Step 1: email lookup ── #}
+  <div class="card">
+    <div class="card-title">Manage Your Subscription</div>
+    <p class="card-sub">Enter the email address you signed up with to view and update your preferences.</p>
+
+    {% if errors %}
+    <div class="errors">
+      <ul>{% for e in errors %}<li>{{ e }}</li>{% endfor %}</ul>
+    </div>
+    {% endif %}
+
+    <form action="/manage" method="POST">
+      <div class="field">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" name="email" placeholder="you@example.com"
+               value="{{ form_data.get('email', '') }}" required />
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%">Look Up My Subscription →</button>
+    </form>
+  </div>
+
+  {% else %}
+  {# ── Step 2: preferences form ── #}
+  {% if flash %}
+  <div class="msg-ok">{{ flash }}</div>
+  {% endif %}
+
+  {% if errors %}
+  <div class="errors">
+    <ul>{% for e in errors %}<li>{{ e }}</li>{% endfor %}</ul>
+  </div>
+  {% endif %}
+
+  <div class="card">
+    <div class="card-title">Hello, {{ user.name }}</div>
+    <p class="card-sub">Update your instruments, timezone, or preferred alert time below.</p>
+
+    <form action="/manage/update" method="POST">
+      <input type="hidden" name="email" value="{{ user.email }}" />
+
+      {# Instruments #}
+      <label>Instruments You Trade</label>
+      {% for group_name, group_pairs in instrument_groups %}
+      <div class="group-label">{{ group_name }}</div>
+      <div class="chip-grid">
+        {% for pair in group_pairs %}
+        <div class="chip">
+          <input type="checkbox" id="p_{{ pair }}" name="instruments" value="{{ pair }}"
+                 {% if pair in selected_instruments %}checked{% endif %} />
+          <label for="p_{{ pair }}"><span class="chip-dot"></span>{{ pair }}</label>
+        </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+
+      {# Timezone #}
+      <div class="field" style="margin-top:20px;">
+        <label for="timezone">Trading Timezone</label>
+        <select id="timezone" name="timezone">
+          {% for code, label, offset in timezone_options %}
+          <option value="{{ code }}" {% if code == user_tz_code %}selected{% endif %}>
+            {{ label }} ({{ offset }})
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      {# Alert time #}
+      <div class="field">
+        <label for="alert_time">Preferred Alert Time</label>
+        <select id="alert_time" name="alert_time">
+          {% for h in range(0, 24) %}
+          {% set t = "%02d:00"|format(h) %}
+          <option value="{{ t }}" {% if t == user.alert_time %}selected{% endif %}>{{ t }}</option>
+          {% set t2 = "%02d:30"|format(h) %}
+          <option value="{{ t2 }}" {% if t2 == user.alert_time %}selected{% endif %}>{{ t2 }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="btn-row">
+        <a href="/manage" class="btn btn-ghost">← Change Email</a>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+      </div>
+    </form>
+  </div>
+
+  {# ── Cancel zone ── #}
+  <div class="cancel-zone">
+    <div class="cancel-title">Cancel Subscription</div>
+    <p class="cancel-sub">
+      This will stop all daily alert emails. Your data is retained so you can re-subscribe at any time.
+      To permanently delete your data, email us after cancelling.
+    </p>
+    <form action="/manage/cancel" method="POST"
+          onsubmit="return confirm('Stop all alerts for {{ user.email }}? You can re-subscribe anytime.');">
+      <input type="hidden" name="email" value="{{ user.email }}" />
+      <button type="submit" class="btn-danger">Cancel My Subscription</button>
+    </form>
+  </div>
+
+  <div class="status-bar">
+    {% if user.active %}
+    STATUS: <span class="dot-green">ACTIVE</span> &nbsp;·&nbsp; {{ user.email }}
+    {% else %}
+    STATUS: <span class="dot-red">INACTIVE</span> &nbsp;·&nbsp; {{ user.email }}
+    {% endif %}
+  </div>
+
+  {% endif %}
+</div>
+
+<script>
+(function () {
+  const symbols = ['$', '€', '£', '¥', '₿', '₣', '₹', '₩', '₽', '₺', 'Fr', '₦', '¢', '₱'];
+  const container = document.getElementById('sym-bg');
+
+  for (let i = 0; i < 20; i++) {
+    const el = document.createElement('span');
+    el.className = 'ccy-sym';
+    el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+
+    const size    = 12 + Math.random() * 28;
+    const opacity = 0.12 + Math.random() * 0.13;
+    const left    = Math.random() * 100;
+    const dur     = 20 + Math.random() * 22;
+    const delay   = -(Math.random() * dur);
+
+    el.style.cssText = `
+      left: ${left}vw;
+      font-size: ${size}px;
+      color: rgba(74, 124, 244, ${opacity});
+      animation-duration: ${dur}s;
+      animation-delay: ${delay}s;
+    `;
+    container.appendChild(el);
+  }
+})();
+</script>
+</body>
+</html>

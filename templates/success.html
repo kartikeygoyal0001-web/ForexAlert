@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>You're In — Forex Factory Alert</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #07090f;
+      --surface:   #0d1120;
+      --surface2:  #111827;
+      --border:    #1c2438;
+      --border2:   #243050;
+      --accent:    #4a7cf4;
+      --green:     #2dc98a;
+      --text:      #c8d4e8;
+      --text-dim:  #5c7095;
+      --font-mono: 'JetBrains Mono', monospace;
+      --font-sans: 'Space Grotesk', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(74, 124, 244, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(74, 124, 244, 0.025) 1px, transparent 1px);
+      background-size: 56px 56px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Currency symbols background ── */
+    #sym-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .ccy-sym {
+      position: absolute;
+      font-family: var(--font-mono);
+      pointer-events: none;
+      user-select: none;
+      animation: sym-drift linear infinite;
+      top: -80px;
+    }
+
+    @keyframes sym-drift {
+      0%   { transform: translateY(-80px) rotate(-5deg); opacity: 0; }
+      6%   { opacity: 1; }
+      90%  { opacity: 1; }
+      100% { transform: translateY(calc(100vh + 80px)) rotate(5deg); opacity: 0; }
+    }
+
+    .card {
+      position: relative;
+      z-index: 5;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 52px 44px;
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      border-radius: 16px 16px 0 0;
+      background: linear-gradient(90deg, transparent, var(--green), transparent);
+      opacity: 0.5;
+    }
+
+    .check-ring {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      background: rgba(45, 201, 138, 0.08);
+      border: 1px solid rgba(45, 201, 138, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 28px;
+      font-size: 30px;
+      animation: pop-in 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+    }
+
+    @keyframes pop-in {
+      0%   { transform: scale(0.6); opacity: 0; }
+      100% { transform: scale(1);   opacity: 1; }
+    }
+
+    h1 {
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #e8edf8;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: var(--text-dim);
+      line-height: 1.7;
+      margin-bottom: 32px;
+    }
+
+    .what-next {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      padding: 18px 20px;
+      text-align: left;
+      margin-bottom: 28px;
+    }
+
+    .what-next-title {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--text-dim);
+      margin-bottom: 14px;
+    }
+
+    .next-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 1.55;
+    }
+
+    .next-item:last-child { margin-bottom: 0; }
+
+    .next-icon {
+      font-size: 15px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .back-btn {
+      display: inline-block;
+      padding: 11px 28px;
+      border-radius: 8px;
+      border: 1px solid var(--border2);
+      background: transparent;
+      color: var(--text-dim);
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-decoration: none;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .back-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .status-bar {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-top: 24px;
+      letter-spacing: 0.08em;
+    }
+
+    .status-bar span { color: var(--green); }
+  </style>
+</head>
+<body>
+
+<div id="sym-bg"></div>
+
+<div class="card">
+  <div class="check-ring">✓</div>
+  <h1>Welcome aboard, {{ name }}!</h1>
+  <p class="subtitle">
+    You're now subscribed to the Forex Factory Daily Alert.
+    Your personalised market briefing will land in your inbox before the session opens.
+  </p>
+
+  <div class="what-next">
+    <div class="what-next-title">What happens next</div>
+    <div class="next-item">
+      <span class="next-icon">📧</span>
+      <span>Check your inbox — a confirmation email and today's market briefing have been sent (if today's pipeline has run).</span>
+    </div>
+    <div class="next-item">
+      <span class="next-icon">📊</span>
+      <span>Each briefing is filtered to only show economic events that directly impact the pairs you trade — no noise, just signal.</span>
+    </div>
+    <div class="next-item">
+      <span class="next-icon">🕐</span>
+      <span>All event times are localised to your trading timezone so you always know exactly when to be at your desk.</span>
+    </div>
+  </div>
+
+  <a href="/" class="back-btn">← Subscribe Another Account</a>
+  <a href="/manage" class="back-btn" style="margin-left:10px;">Manage Subscription</a>
+
+  <div class="status-bar">STATUS: <span>ACTIVE</span> &nbsp;·&nbsp; DAILY ALERTS: <span>ENABLED</span></div>
+</div>
+
+<script>
+(function () {
+  const symbols = ['$', '€', '£', '¥', '₿', '₣', '₹', '₩', '₽', '₺', 'Fr', '₦', '¢', '₱'];
+  const container = document.getElementById('sym-bg');
+
+  for (let i = 0; i < 22; i++) {
+    const el = document.createElement('span');
+    el.className = 'ccy-sym';
+    el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+
+    const size    = 12 + Math.random() * 28;
+    const opacity = 0.12 + Math.random() * 0.13;
+    const left    = Math.random() * 100;
+    const dur     = 20 + Math.random() * 22;
+    const delay   = -(Math.random() * dur);
+
+    el.style.cssText = `
+      left: ${left}vw;
+      font-size: ${size}px;
+      color: rgba(74, 124, 244, ${opacity});
+      animation-duration: ${dur}s;
+      animation-delay: ${delay}s;
+    `;
+    container.appendChild(el);
+  }
+})();
+</script>
+</body>
+</html>
